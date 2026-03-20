@@ -1,0 +1,36 @@
+name: Daily Content Engine
+
+on:
+  schedule:
+    - cron: "0 11 * * *"   # Every day at 8am Buenos Aires time (UTC-3 = 11:00 UTC)
+  workflow_dispatch:         # Also allows manual trigger from GitHub UI
+
+jobs:
+  run-content-engine:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run content engine
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        run: python content_engine/main.py
+
+      - name: Upload CSVs as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-content
+          path: output/*.csv
+          retention-days: 30
