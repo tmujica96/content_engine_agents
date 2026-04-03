@@ -23,7 +23,7 @@ def run_trend_scout(client: anthropic.Anthropic, output_dir: str = "output") -> 
 Busca en fuentes como Reddit (r/datascience, r/MachineLearning, r/Python, r/artificial),
 LinkedIn, YouTube y Twitter/X.
 
-Devuelve EXACTAMENTE 7 temas trending con el siguiente JSON (solo el JSON, sin texto adicional):
+Devuelve EXACTAMENTE 5 temas trending con el siguiente JSON (solo el JSON, sin texto adicional):
 {{
     "trending_topics": [
         {{
