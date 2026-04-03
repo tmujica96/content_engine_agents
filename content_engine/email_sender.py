@@ -1,9 +1,5 @@
-import smtplib
 import os
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from email.mime.base import MIMEBase
-from email import encoders
+import requests
 from datetime import date
 
 
@@ -75,7 +71,7 @@ def build_html_email(trending: list[dict], edu: list[dict], news: list[dict]) ->
     # NEWS CAROUSELS
     html += """
     <h2 style="color:#16213e; border-bottom: 2px solid #e94560; padding-bottom:6px; margin-top:30px;">
-        📰 Noticias de IA & Data (3 carruseles)
+        📰 Noticia de IA & Data
     </h2>"""
 
     for i, c in enumerate(news, 1):
@@ -111,25 +107,31 @@ def build_html_email(trending: list[dict], edu: list[dict], news: list[dict]) ->
 
 
 def send_email(trending: list[dict], edu: list[dict], news: list[dict]):
-    """Sends the daily content digest to tomasmujicag@gmail.com via Gmail SMTP."""
+    """Publishes the daily content digest as a Beehiiv newsletter post."""
 
-    gmail_user = os.environ["GMAIL_USER"]        # your Gmail address
-    gmail_password = os.environ["GMAIL_APP_PASSWORD"]  # Gmail App Password
-    recipient = "tomasmujica96@gmail.com"
+    api_key = os.environ["BEEHIIV_API_KEY"]
+    publication_id = os.environ["BEEHIIV_PUBLICATION_ID"]
 
     today = date.today().strftime("%d %b %Y")
-    subject = f"📊 datacontomas — Contenido del día {today}"
-
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = subject
-    msg["From"] = gmail_user
-    msg["To"] = recipient
-
+    title = f"📊 datacontomas — Contenido del día {today}"
     html_content = build_html_email(trending, edu, news)
-    msg.attach(MIMEText(html_content, "html"))
 
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-        server.login(gmail_user, gmail_password)
-        server.sendmail(gmail_user, recipient, msg.as_string())
+    url = f"https://api.beehiiv.com/v2/publications/{publication_id}/posts"
 
-    print(f"Email enviado a {recipient}")
+    payload = {
+        "title": title,
+        "body_content": html_content,
+        "content_tags": ["data", "ia", "contenido"],
+        "status": "confirmed",   # publishes and sends immediately
+    }
+
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
+
+    response = requests.post(url, json=payload, headers=headers)
+    response.raise_for_status()
+
+    post_id = response.json().get("data", {}).get("id", "unknown")
+    print(f"Newsletter enviado via Beehiiv. Post ID: {post_id}")
