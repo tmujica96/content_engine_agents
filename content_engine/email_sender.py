@@ -1,5 +1,7 @@
+import smtplib
 import os
-import requests
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from datetime import date
 
 
@@ -107,31 +109,25 @@ def build_html_email(trending: list[dict], edu: list[dict], news: list[dict]) ->
 
 
 def send_email(trending: list[dict], edu: list[dict], news: list[dict]):
-    """Publishes the daily content digest as a Beehiiv newsletter post."""
+    """Sends the daily content digest to tomasmujica96@gmail.com via Gmail SMTP."""
 
-    api_key = os.environ["BEEHIIV_API_KEY"]
-    publication_id = os.environ["BEEHIIV_PUBLICATION_ID"]
+    gmail_user = os.environ["GMAIL_USER"]
+    gmail_password = os.environ["GMAIL_APP_PASSWORD"]
+    recipient = "tomasmujica96@gmail.com"
 
     today = date.today().strftime("%d %b %Y")
-    title = f"📊 datacontomas — Contenido del día {today}"
+    subject = f"📊 datacontomas — Contenido del día {today}"
+
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["From"] = gmail_user
+    msg["To"] = recipient
+
     html_content = build_html_email(trending, edu, news)
+    msg.attach(MIMEText(html_content, "html"))
 
-    url = f"https://api.beehiiv.com/v2/publications/{publication_id}/posts"
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        server.login(gmail_user, gmail_password)
+        server.sendmail(gmail_user, recipient, msg.as_string())
 
-    payload = {
-        "title": title,
-        "body_content": html_content,
-        "content_tags": ["data", "ia", "contenido"],
-        "status": "draft",   # draft until Send API is enabled
-    }
-
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json",
-    }
-
-    response = requests.post(url, json=payload, headers=headers)
-    response.raise_for_status()
-
-    post_id = response.json().get("data", {}).get("id", "unknown")
-    print(f"Newsletter enviado via Beehiiv. Post ID: {post_id}")
+    print(f"Email enviado a {recipient}")
