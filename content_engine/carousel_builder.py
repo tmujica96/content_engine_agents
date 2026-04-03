@@ -81,13 +81,13 @@ def run_news_carousels(client: anthropic.Anthropic, output_dir: str = "output") 
     """
     today = date.today().isoformat()
 
-    prompt = f"""Busca en internet las 3 noticias más importantes de HOY ({today}) sobre:
+    prompt = f"""Busca en internet la noticia más importante de HOY ({today}) sobre:
 - Inteligencia Artificial (nuevos modelos, lanzamientos, actualizaciones de OpenAI, Anthropic, Google, Meta, etc.)
 - Data Science o Big Data
 - Machine Learning
 - Herramientas o librerías de Python para datos
 
-Luego crea un carrusel de Instagram de 5 slides para cada noticia en ESPAÑOL.
+Luego crea un carrusel de Instagram de 5 slides para esa noticia en ESPAÑOL.
 
 Devuelve EXACTAMENTE este JSON (solo el JSON, sin texto adicional):
 {{
