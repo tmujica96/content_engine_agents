@@ -122,7 +122,7 @@ def send_email(trending: list[dict], edu: list[dict], news: list[dict]):
         "title": title,
         "body_content": html_content,
         "content_tags": ["data", "ia", "contenido"],
-        "status": "confirmed",   # publishes and sends immediately
+        "status": "draft",   # draft until Send API is enabled
     }
 
     headers = {
