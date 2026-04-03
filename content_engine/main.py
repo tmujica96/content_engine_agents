@@ -1,4 +1,5 @@
 import anthropic
+import time
 import os
 import sys
 
@@ -28,6 +29,8 @@ def main():
         for i, t in enumerate(topics, 1):
             print(f"  {i}. {t['topic']} ({t['platform']}) — {t['difficulty']}")
 
+    time.sleep(65)  # wait for rate limit window to reset
+
     # Agent 2a: Educational Carousels
     print("\n[2/3] CAROUSEL EDUCATIVO — Generando 2 ideas...")
     edu = run_educational_carousels(client, output_dir)
@@ -37,6 +40,8 @@ def main():
         print("\n  Ideas educativas:")
         for i, c in enumerate(edu, 1):
             print(f"  {i}. [{c['category']}] {c['slide_1_cover']}")
+
+    time.sleep(65)  # wait for rate limit window to reset
 
     # Agent 2b: News Carousels
     print("\n[3/3] CAROUSEL DE NOTICIAS — Buscando las 3 noticias del dia...")
